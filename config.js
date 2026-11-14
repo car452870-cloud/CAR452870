@@ -1,2 +1,2 @@
 // Link /exec da implementação do Apps Script. Só este ficheiro precisa do teu link.
-window.API_URL = 'COLA_AQUI_O_LINK_EXEC_DO_APPS_SCRIPT';
+window.API_URL = 'https://script.google.com/macros/s/AKfycbxGoqWphxji4g_sb2iVv5Il5Y9duOw7WHnsyuCsfUAViWfV1E2oSSChC_XpDdIYR8X6aA/exec';
