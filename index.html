@@ -9,9 +9,8 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="theme-color" content="#1f2933">
+<script src="config.js"></script>
 <script>
-// Ligação ao Apps Script (substitui google.script.run). Preenche o endereço da tua implementação /exec.
-var API_URL = 'https://script.google.com/macros/s/AKfycbxGoqWphxji4g_sb2iVv5Il5Y9duOw7WHnsyuCsfUAViWfV1E2oSSChC_XpDdIYR8X6aA/exec';
 window.google = { script: { get run() {
   var ok = function () {}, ko = function () {};
   var proxy = new Proxy({}, { get: function (_, nome) {
@@ -19,7 +18,7 @@ window.google = { script: { get run() {
     if (nome === 'withFailureHandler') return function (f) { ko = f; return proxy; };
     return function () {
       var args = Array.prototype.slice.call(arguments), s = ok, k = ko;
-      fetch(API_URL, { method: 'POST', body: JSON.stringify({ fn: nome, args: args }) })
+      fetch(window.API_URL, { method: 'POST', body: JSON.stringify({ fn: nome, args: args }) })
         .then(function (r) { return r.json(); })
         .then(function (j) { if (j && j.ok) s(j.r); else k(new Error('servidor')); })
         .catch(function (e) { k(e); });
@@ -237,6 +236,7 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catc
       <label><input type="checkbox" id="anObras"> <span data-i18n="an_incluir">Incluir obras e diversos</span></label>
     </div>
     <div id="anConteudo"></div>
+    <div id="prevConteudo"></div>
   </div>
 
   <footer>
@@ -282,6 +282,7 @@ var T = {
     seg_a_enviar:'A enviar…', seg_ok:'Recebido. Obrigado!',
     seg_e_ficheiro:'Escolhe o documento.', seg_e_data:'Indica a data de fim do seguro (tem de ser futura).',
     seg_e_tamanho:'O ficheiro é demasiado grande (máx. 8 MB).', seg_e_tipo:'Só PDF, JPG ou PNG.', seg_e_geral:'Não foi possível enviar. Tenta de novo.',
+    pv_titulo:'Orçamento e previsão', pv_nota:'Estimativa a partir dos últimos 12 meses (despesas correntes com subida de {g}). Não inclui avarias nem aumentos imprevistos.', pv_saldo:'Saldo atual', pv_desp:'Despesas correntes previstas (12 meses)', pv_quotas:'Quotas previstas (12 meses)', pv_liq:'Quotas − despesas, por mês', pv_cob:'Cobertura da caixa', pv_cob_s:'meses de despesas correntes', pv_3m:'Caixa para 3 meses sem quotas', pv_3m_ok:'Sim: precisa de {a}, tem {b}.', pv_3m_ko:'Não: precisa de {a}, tem {b} (faltam {c}).', pv_res:'Fundo de reserva legal (10% das quotas)', pv_res_s:'{a} por ano a reservar', pv_cat:'Despesas previstas por categoria', pv_ult:'Últimos 12 meses', pv_prev:'Previsto', pv_obras:'Obras previstas', pv_sem_obras:'Sem obras previstas.', pv_antes:'Caixa prevista antes: {a}', pv_depois:'Depois da obra: {a}', pv_extra:'Para manter 3 meses de reserva: +{a} por fração e por mês até lá', pv_ok:'Caixa suficiente, mantendo 3 meses de reserva.', pv_add:'Adicionar obra', pv_desc:'Descrição', pv_valor:'Valor (€)', pv_ano:'Ano', pv_mes:'Mês', pv_guardar:'Guardar', pv_apagar:'apagar', pv_erro:'Não foi possível guardar. Confirma os dados.',
     analise:'Análise', an_titulo:'Quotas vs despesas', an_ult10:'Últimos 10 anos', an_todos:'Todos', an_incluir:'Incluir obras e diversos',
     an_quotas:'Quotas (total anual)', an_corr:'Despesas correntes', an_obras:'Obras e diversos', an_caixa:'Saldo em caixa no fim do ano', an_margem:'Margem (quotas − despesas correntes)',
     an_s1_k:'Quota anual total', an_s1_v:'inalterada desde {y}', an_s1_v2:'por ano',
@@ -325,6 +326,7 @@ var T = {
     seg_a_enviar:'Uploading…', seg_ok:'Received. Thank you!',
     seg_e_ficheiro:'Choose the document.', seg_e_data:'Enter the policy end date (it must be in the future).',
     seg_e_tamanho:'The file is too large (max. 8 MB).', seg_e_tipo:'PDF, JPG or PNG only.', seg_e_geral:'Could not upload. Please try again.',
+    pv_titulo:'Budget and forecast', pv_nota:'Estimate based on the last 12 months (running costs rising by {g}). Does not include breakdowns or unexpected increases.', pv_saldo:'Current balance', pv_desp:'Forecast running costs (12 months)', pv_quotas:'Expected fees (12 months)', pv_liq:'Fees − costs, per month', pv_cob:'Cash cover', pv_cob_s:'months of running costs', pv_3m:'Cash for 3 months with no fees', pv_3m_ok:'Yes: needs {a}, has {b}.', pv_3m_ko:'No: needs {a}, has {b} (short by {c}).', pv_res:'Legal reserve fund (10% of fees)', pv_res_s:'{a} per year to set aside', pv_cat:'Forecast costs by category', pv_ult:'Last 12 months', pv_prev:'Forecast', pv_obras:'Planned works', pv_sem_obras:'No works planned.', pv_antes:'Forecast cash before: {a}', pv_depois:'After the works: {a}', pv_extra:'To keep a 3-month reserve: +{a} per unit per month until then', pv_ok:'Enough cash, keeping a 3-month reserve.', pv_add:'Add works', pv_desc:'Description', pv_valor:'Amount (€)', pv_ano:'Year', pv_mes:'Month', pv_guardar:'Save', pv_apagar:'delete', pv_erro:'Could not save. Check the data.',
     analise:'Analysis', an_titulo:'Fees vs expenses', an_ult10:'Last 10 years', an_todos:'All', an_incluir:'Include works & other',
     an_quotas:'Fees (annual total)', an_corr:'Running expenses', an_obras:'Works & other', an_caixa:'Cash balance at year end', an_margem:'Margin (fees − running expenses)',
     an_s1_k:'Total annual fees', an_s1_v:'unchanged since {y}', an_s1_v2:'per year',
@@ -391,7 +393,7 @@ function aplicarTextos() {
 }
 function mudarLingua(l) {
   lang = l; guardar('condo_lang', l); aplicarTextos();
-  if (!$('appView').classList.contains('hidden') && dados) { desenhar(); if (anoCarregado !== null && !$('viewHist').classList.contains('hidden')) carregarAno(anoCarregado); if (analise && !$('viewAn').classList.contains('hidden')) desenharAnalise(); }
+  if (!$('appView').classList.contains('hidden') && dados) { desenhar(); if (anoCarregado !== null && !$('viewHist').classList.contains('hidden')) carregarAno(anoCarregado); if (analise && !$('viewAn').classList.contains('hidden')) { desenharAnalise(); desenharPrevisao(); } }
   if (!$('segView').classList.contains('hidden')) desenharSeguroForm();
   if (!$('passo2').classList.contains('hidden')) $('loginTxt').textContent = t('login_enviado');
 }
@@ -749,6 +751,67 @@ function carregarAnalise() {
     })
     .withFailureHandler(function () { $('anConteudo').textContent = t('erro_ano'); })
     .obterAnalise(ler('condo_token'));
+  carregarPrevisao();
+}
+var previsao = null;
+function carregarPrevisao() {
+  google.script.run
+    .withSuccessHandler(function (r) { if (r && !r.erro) { previsao = r; desenharPrevisao(); } })
+    .withFailureHandler(function () {})
+    .obterPrevisao(ler('condo_token'));
+}
+function desenharPrevisao() {
+  var p = previsao, box = $('prevConteudo'); box.innerHTML = '';
+  if (!p) return;
+  var pct = (p.crescimento * 100).toFixed(0).replace('.', lang === 'en' ? '.' : ',') + '%';
+  var h = document.createElement('h2'); h.style.marginTop = '38px'; h.textContent = t('pv_titulo'); box.appendChild(h);
+  var nota = document.createElement('div'); nota.className = 'nota'; nota.textContent = t('pv_nota', { g: pct }); box.appendChild(nota);
+  var stats = document.createElement('div'); stats.className = 'stats';
+  function card(k, v, s) { var c = document.createElement('div'); c.className = 'stat'; c.innerHTML = '<div class="k"></div><div class="v"></div><div class="s"></div>'; c.children[0].textContent = k; c.children[1].textContent = v; c.children[2].textContent = s || ''; stats.appendChild(c); }
+  card(t('pv_saldo'), eur(p.saldo), '');
+  card(t('pv_desp'), eur(p.previsto), t('pv_quotas') + ': ' + eur(p.quotasAno));
+  card(t('pv_liq'), (p.liquidoMes >= 0 ? '+ ' : '− ') + eur(Math.abs(p.liquidoMes)), '');
+  card(t('pv_cob'), p.mesesCobertura === null ? '—' : String(p.mesesCobertura).replace('.', lang === 'en' ? '.' : ','), t('pv_cob_s'));
+  card(t('pv_3m'), p.tresMesesOk ? '✔' : '✖', p.tresMesesOk ? t('pv_3m_ok', { a: eur(p.colchao), b: eur(p.saldo) }) : t('pv_3m_ko', { a: eur(p.colchao), b: eur(p.saldo), c: eur(p.colchao - p.saldo) }));
+  card(t('pv_res'), eur(p.reservaLegal), t('pv_res_s', { a: eur(p.reservaLegal) }));
+  box.appendChild(stats);
+
+  var h2 = document.createElement('h2'); h2.style.marginTop = '26px'; h2.textContent = t('pv_cat'); box.appendChild(h2);
+  var tb = document.createElement('table'); tb.className = 'hist';
+  var th = document.createElement('tr'); celula(th, ''); celula(th, t('pv_ult'), 'amount'); celula(th, t('pv_prev'), 'amount'); tb.appendChild(th);
+  p.porCategoria.forEach(function (c) { var tr = document.createElement('tr'); celula(tr, tCat(c.nome)); celula(tr, eur(c.ultimos12), 'amount'); celula(tr, eur(c.previsto), 'amount'); tb.appendChild(tr); });
+  box.appendChild(tb);
+
+  var h3 = document.createElement('h2'); h3.style.marginTop = '30px'; h3.textContent = t('pv_obras'); box.appendChild(h3);
+  if (!p.obras.length) { var s = document.createElement('div'); s.className = 'nota'; s.textContent = t('pv_sem_obras'); box.appendChild(s); }
+  p.obras.forEach(function (o) {
+    var d = document.createElement('div'); d.className = 'nota';
+    var l1 = document.createElement('strong'); l1.textContent = o.desc + ' — ' + eur(o.valor) + ' (' + (o.mes < 10 ? '0' : '') + o.mes + '/' + o.ano + ')'; d.appendChild(l1);
+    [t('pv_antes', { a: eur(o.saldoAntes) }), t('pv_depois', { a: eur(o.saldoDepois) }), o.abaixoColchao ? t('pv_extra', { a: eur(o.extraMensalFracao) }) : t('pv_ok')].forEach(function (x) {
+      var q = document.createElement('div'); q.textContent = x; d.appendChild(q);
+    });
+    if (p.admin && o.linha) {
+      var b = document.createElement('button'); b.className = 'fat'; b.style.marginLeft = '0'; b.style.marginTop = '6px'; b.textContent = t('pv_apagar');
+      b.onclick = function () { b.disabled = true; google.script.run.withSuccessHandler(carregarPrevisao).withFailureHandler(carregarPrevisao).apagarObra(ler('condo_token'), o.linha); };
+      d.appendChild(b);
+    }
+    box.appendChild(d);
+  });
+  if (p.admin) {
+    var f = document.createElement('div'); f.className = 'nota';
+    f.innerHTML = '<strong></strong><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"><input id="obD" style="flex:2;min-width:160px"><input id="obV" inputmode="decimal" style="flex:1;min-width:90px"><input id="obA" inputmode="numeric" style="width:80px"><input id="obM" inputmode="numeric" style="width:64px"><button class="fat" id="obG" style="margin:0"></button></div><div class="msg" id="obMsg"></div>';
+    f.querySelector('strong').textContent = t('pv_add');
+    f.querySelector('#obD').placeholder = t('pv_desc'); f.querySelector('#obV').placeholder = t('pv_valor');
+    f.querySelector('#obA').placeholder = t('pv_ano'); f.querySelector('#obM').placeholder = t('pv_mes'); f.querySelector('#obG').textContent = t('pv_guardar');
+    box.appendChild(f);
+    $('obG').onclick = function () {
+      $('obG').disabled = true;
+      google.script.run
+        .withSuccessHandler(function (r) { $('obG').disabled = false; if (r && r.ok) carregarPrevisao(); else msg($('obMsg'), t('pv_erro')); })
+        .withFailureHandler(function () { $('obG').disabled = false; msg($('obMsg'), t('pv_erro')); })
+        .guardarObra(ler('condo_token'), $('obD').value, $('obV').value, $('obA').value, $('obM').value);
+    };
+  }
 }
 var SVGNS = 'http://www.w3.org/2000/svg';
 function el(n, a, txt) { var e = document.createElementNS(SVGNS, n); for (var k in a) e.setAttribute(k, a[k]); if (txt !== undefined) e.textContent = txt; return e; }
